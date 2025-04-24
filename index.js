@@ -6,7 +6,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const PAYSTACK_SECRET_KEY = 'sk_live_5ec668e68cab5e44f88bb1e3aa2edfb43eb0dcca'; // Replace with new one after testing
+// Use the Paystack Secret Key from environment variables
+const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY; // This will read from the environment variable
 
 // Test Route
 app.get('/', (req, res) => {
@@ -44,5 +45,6 @@ app.post('/pay/mpesa', async (req, res) => {
   }
 });
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => console.log(`Paystack MPESA server running on http://localhost:${PORT}`));
