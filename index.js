@@ -83,6 +83,8 @@ const handleStkSent = (stkData) => {
 app.post('/paystack/success', (req, res) => {
   const paymentData = req.body; // Assuming Paystack sends payment data in the body
   
+  console.log('Received Payment Data from Paystack (Success):', paymentData);  // Log received data
+  
   if (paymentData.status === 'success') {
     handlePaymentSuccess(paymentData);
     res.status(200).send('Payment Success');
@@ -95,6 +97,8 @@ app.post('/paystack/success', (req, res) => {
 app.post('/paystack/failed', (req, res) => {
   const paymentData = req.body;
   
+  console.log('Received Payment Data from Paystack (Failed):', paymentData);  // Log received data
+  
   if (paymentData.status === 'failed') {
     handlePaymentDeclined(paymentData);
     res.status(200).send('Payment Failed');
@@ -106,6 +110,8 @@ app.post('/paystack/failed', (req, res) => {
 // Handle STK sent callback (for M-Pesa or similar)
 app.post('/stk/sent', (req, res) => {
   const stkData = req.body; // Assuming STK data is in the body
+  
+  console.log('Received STK Sent Data:', stkData);  // Log received data
   
   if (stkData.status === 'sent') {
     handleStkSent(stkData);
@@ -124,6 +130,7 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
+
 
 
 
