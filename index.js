@@ -1,50 +1,42 @@
+// Import necessary libraries
 const express = require('express');
-const axios = require('axios');
-const cors = require('cors');
+const admin = require('firebase-admin');
+require('dotenv').config(); // To load environment variables from .env file
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+const port = process.env.PORT || 3000;  // Default to port 3000 if not specified
 
-// Use the Paystack Secret Key from environment variables
-const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY; // This will read from the environment variable
-
-// Test Route
-app.get('/', (req, res) => {
-  res.send('Server is running!');
+// Initialize Firebase Admin SDK using environment variables
+admin.initializeApp({
+  credential: admin.credential.cert({
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'), // Handle newlines in private key
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+  }),
 });
 
-app.post('/pay/mpesa', async (req, res) => {
-  const { email, amount, phone } = req.body;
-
-  try {
-    console.log(phone, amount);
-    const response = await axios.post(
-      'https://api.paystack.co/charge',
-      {
-        email,
-        amount: amount * 100,
-        currency: 'KES',
-        mobile_money: {
-          phone,
-          provider: 'mpesa',
-        },
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
-          'Content-Type': 'application/json',
-        },
+// Sample route to verify Firebase connection
+app.get('/firebase-status', (req, res) => {
+  admin.firestore().collection('status').doc('status').get()
+    .then((doc) => {
+      if (doc.exists) {
+        res.send('Firebase is connected: ' + doc.data().message);
+      } else {
+        res.send('Firebase is connected, but no status message found.');
       }
-    );
-
-    res.status(200).json(response.data);
-  } catch (error) {
-    console.error(error.response?.data || error.message);
-    res.status(500).json({ error: error.response?.data || error.message });
-  }
+    })
+    .catch((error) => {
+      res.status(500).send('Error getting Firebase document: ' + error.message);
+    });
 });
 
-const PORT = process.env.PORT || 5000;
+// Example of a basic route
+app.get('/', (req, res) => {
+  res.send('Hello, world!');
+});
 
-app.listen(PORT, () => console.log(`Paystack MPESA server running on http://localhost:${PORT}`));
+// Start server
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
+
